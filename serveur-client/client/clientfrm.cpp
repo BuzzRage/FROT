@@ -125,7 +125,7 @@ void ClientFrm::on_outputLbl_moussePressed(const QPoint pt)
 
 void ClientFrm::on_videoBtn_pressed()
 {
-    QString str = "v;";
+    QString str = "v;"+QString::number(lblImg->value());
     sendString(str);
 }
 

@@ -77,9 +77,11 @@ void ServerFrm::getClientData()
             mode = list.at(0);
             qDebug() << "Mode demandé: " << mode;
             if(mode == "v"){
+                int sujet = list.at(1).toInt(&ok, 10);
                 timer.start(200);
             }
             else if(mode == "p"){
+
                 timer.stop();
                 updateLbl();
             }
@@ -175,9 +177,9 @@ void ServerFrm::getImage(){
 void ServerFrm::extractImg(int posX, int posY, int label){
     Mat visage;
     for(size_t i=0; i<faces.size(); i++){
-        qDebug()<<"Bite";
-        if(faces[i].x > posX && posX < (faces[i].x + faces[i].width)){
-           if(faces[i].y < posY && posY > (faces[i].y + faces[i].height)){
+        //qDebug()<<faces[i].x<<faces[i].x + faces[i].width<<faces[i].y<<faces[i].y + faces[i].height;
+        if(faces[i].x < posX && posX < (faces[i].x + faces[i].width)){
+           if(faces[i].y < posY && posY < (faces[i].y + faces[i].height)){
              visage = flippedImg(faces[i]);
              trainingImgs.push_back(visage);
              trainingLabel.push_back(label);
@@ -185,6 +187,60 @@ void ServerFrm::extractImg(int posX, int posY, int label){
            }
         }
     }
+}
+
+void ServerFrm::train(int)
+{
+    // The following lines simply get the last images from
+        // your dataset and remove it from the vector. This is
+        // done, so that the training data (which we learn the
+        // cv::LBPHFaceRecognizer on) and the test data we test
+        // the model with, do not overlap.
+        Mat testSample = trainingImgs[trainingImgs.size() - 1];
+        int testLabel = trainingLabel[trainingLabel.size() - 1];
+        trainingImgs.pop_back();
+        trainingLabel.pop_back();
+        Ptr<LBPHFaceRecognizer> model = LBPHFaceRecognizer::create();
+        model->train(trainingImgs, trainingLabel);
+        // The following line predicts the label of a given
+        // test image:
+        int predictedLabel = model->predict(testSample);
+        //
+        // To get the confidence of a prediction call the model with:
+        //
+        //      int predictedLabel = -1;
+        //      double confidence = 0.0;
+        //      model->predict(testSample, predictedLabel, confidence);
+        //
+        string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
+        msgBox->append(result_message);
+        // First we'll use it to set the threshold of the LBPHFaceRecognizer
+        // to 0.0 without retraining the model. This can be useful if
+        // you are evaluating the model:
+        //
+        model->setThreshold(0.0);
+        // Now the threshold of this model is set to 0.0. A prediction
+        // now returns -1, as it's impossible to have a distance below
+        // it
+        predictedLabel = model->predict(testSample);
+        msgBox->append("Predicted class = ");
+        msgBox->append(predictedLabel);
+        // Show some informations about the model, as there's no cool
+        // Model data to display as in Eigenfaces/Fisherfaces.
+        // Due to efficiency reasons the LBP images are not stored
+        // within the model:
+        msgBox->append("Model Information:");
+        string model_info = format("\tLBPH(radius=%i, neighbors=%i, grid_x=%i, grid_y=%i, threshold=%.2f)",
+                model->getRadius(),
+                model->getNeighbors(),
+                model->getGridX(),
+                model->getGridY(),
+                model->getThreshold());
+        msgBox->append(model_info);
+        // We could get the histograms for example:
+        vector<Mat> histograms = model->getHistograms();
+        // But should I really visualize it? Probably the length is interesting:
+        cout << "Size of the histograms: " << histograms[0].total() << endl;
 }
 
 void ServerFrm::updateLbl(){
