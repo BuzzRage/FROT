@@ -164,14 +164,15 @@ void ServerFrm::getImage(){
         }
         else{
             for(size_t i=0; i<faces.size(); i++){
-                Point center(faces[i].x + faces[i].width * 0.5, faces[i].y + faces[i].height * 0.5);
                     //qDebug()<<"J'suis.";
                     if(!mode_photo){
                         imgBuffer = flippedImg(faces[i]);
                         int pred = model->predict(imgBuffer);
+                        string str = format("Label : %i",pred);
                         qDebug()<<pred<<" sjt: "<<sujet;
                         if(pred == sujet){
                             rectangle(flippedImg, faces[i], Scalar(255, 0, 255), 1, 8, 0);
+                            putText(flippedImg, str, cvPoint(faces[i].x, (faces[i].y-5)), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(255,255,255));
                         }
                     }else{
                         rectangle(flippedImg, faces[i], Scalar(255, 0, 255), 1, 8, 0);
@@ -227,7 +228,7 @@ void ServerFrm::train()
         // to 0.0 without retraining the model. This can be useful if
         // you are evaluating the model:
         //
-        //model->set("threshold",10.0);
+        model->set("threshold",1000.0);
         // Now the threshold of this model is set to 0.0. A prediction
         // now returns -1, as it's impossible to have a distance below
         // it
@@ -243,8 +244,8 @@ void ServerFrm::train()
                 model->getInt("radius"),
                 model->getInt("neighbors"),
                 model->getInt("grid_x"),
-                model->getInt("grid_y")/*,
-                model->getDouble("threshold")*/);
+                model->getInt("grid_y"),
+                model->getDouble("threshold"));
         msgBox->append(QString::fromStdString(model_info));
         // We could get the histograms for example:
         vector<Mat> histograms = model->getMatVector("histograms");
