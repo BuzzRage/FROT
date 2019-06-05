@@ -11,6 +11,7 @@ ClientFrm::ClientFrm(QWidget *parent) :
     connect(socket,SIGNAL(readyRead()), this, SLOT(getServerData()));
     connect(socket,SIGNAL(connected()), this, SLOT(connectServer()));
     connect(socket,SIGNAL(disconnected()), this, SLOT(deconnect()));
+    connect(socket,SIGNAL(disconnected()), socket, SLOT(deleteLater()));
     connect(socket,SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errorSocket(QAbstractSocket::SocketError)));
     tailleMsg = 0;
 }

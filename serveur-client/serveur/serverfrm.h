@@ -13,6 +13,8 @@
 #include <QtMath>
 #include <ctime>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 using namespace cv;
@@ -32,6 +34,7 @@ private slots:
     void getImage();
     void updateLbl();
     void extractImg(int,int,int);
+    void train();
 
 private:
     QTcpServer *server;
@@ -48,11 +51,13 @@ private:
     int currentY;
     int currentLabel;
     QString mode;
-    cv::Rect trackedFace;
-    vector<Mat> trainingImgs;
+    vector<Mat > trainingImgs;
     vector<int> trainingLabel;
-    vector<cv::Rect> faces;
+    vector<cv::Rect > faces;
     bool trainingMode;
+    Ptr<FaceRecognizer > model;
+    bool mode_photo;
+    int sujet;
 
 };
 

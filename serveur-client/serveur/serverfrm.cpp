@@ -77,11 +77,13 @@ void ServerFrm::getClientData()
             mode = list.at(0);
             qDebug() << "Mode demandé: " << mode;
             if(mode == "v"){
-                int sujet = list.at(1).toInt(&ok, 10);
+                mode_photo = false;
+                sujet = list.at(1).toInt(&ok, 10);
+                train();
                 timer.start(200);
             }
             else if(mode == "p"){
-
+                mode_photo = true;
                 timer.stop();
                 updateLbl();
             }
@@ -145,6 +147,7 @@ void ServerFrm::initCamera() {
 
 void ServerFrm::getImage(){
     Mat image;
+    Mat imgBuffer;
     Camera.open();
     Camera.grab();
     Camera.retrieve(image);
@@ -162,12 +165,17 @@ void ServerFrm::getImage(){
         else{
             for(size_t i=0; i<faces.size(); i++){
                 Point center(faces[i].x + faces[i].width * 0.5, faces[i].y + faces[i].height * 0.5);
-                if(qFabs(faces[i].x - currentX) < faces[i].width && qFabs(faces[i].y - currentY) < faces[i].height){
                     //qDebug()<<"J'suis.";
-                    trackedFace = faces[i];
-                    //trainingImgs.push_back(new Mat(flippedImg, trackedFace));
-                }
-                rectangle(flippedImg, faces[i], Scalar(255, 0, 255), 1, 8, 0);
+                    if(!mode_photo){
+                        imgBuffer = flippedImg(faces[i]);
+                        int pred = model->predict(imgBuffer);
+                        qDebug()<<pred<<" sjt: "<<sujet;
+                        if(pred == sujet){
+                            rectangle(flippedImg, faces[i], Scalar(255, 0, 255), 1, 8, 0);
+                        }
+                    }else{
+                        rectangle(flippedImg, faces[i], Scalar(255, 0, 255), 1, 8, 0);
+                    }
                 //qDebug()<<"X : "<<faces[i].x<<" Y : "<<faces[i].y;
             }
         }
@@ -189,7 +197,7 @@ void ServerFrm::extractImg(int posX, int posY, int label){
     }
 }
 
-void ServerFrm::train(int)
+void ServerFrm::train()
 {
     // The following lines simply get the last images from
         // your dataset and remove it from the vector. This is
@@ -200,7 +208,7 @@ void ServerFrm::train(int)
         int testLabel = trainingLabel[trainingLabel.size() - 1];
         trainingImgs.pop_back();
         trainingLabel.pop_back();
-        Ptr<LBPHFaceRecognizer> model = LBPHFaceRecognizer::create();
+        model = createLBPHFaceRecognizer();
         model->train(trainingImgs, trainingLabel);
         // The following line predicts the label of a given
         // test image:
@@ -213,32 +221,33 @@ void ServerFrm::train(int)
         //      model->predict(testSample, predictedLabel, confidence);
         //
         string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
-        msgBox->append(result_message);
+        msgBox->append(result_message.c_str());
+
         // First we'll use it to set the threshold of the LBPHFaceRecognizer
         // to 0.0 without retraining the model. This can be useful if
         // you are evaluating the model:
         //
-        model->setThreshold(0.0);
+        //model->set("threshold",10.0);
         // Now the threshold of this model is set to 0.0. A prediction
         // now returns -1, as it's impossible to have a distance below
         // it
         predictedLabel = model->predict(testSample);
         msgBox->append("Predicted class = ");
-        msgBox->append(predictedLabel);
+        msgBox->append(tr("pred = %1").arg(predictedLabel));
         // Show some informations about the model, as there's no cool
         // Model data to display as in Eigenfaces/Fisherfaces.
         // Due to efficiency reasons the LBP images are not stored
         // within the model:
         msgBox->append("Model Information:");
         string model_info = format("\tLBPH(radius=%i, neighbors=%i, grid_x=%i, grid_y=%i, threshold=%.2f)",
-                model->getRadius(),
-                model->getNeighbors(),
-                model->getGridX(),
-                model->getGridY(),
-                model->getThreshold());
-        msgBox->append(model_info);
+                model->getInt("radius"),
+                model->getInt("neighbors"),
+                model->getInt("grid_x"),
+                model->getInt("grid_y")/*,
+                model->getDouble("threshold")*/);
+        msgBox->append(QString::fromStdString(model_info));
         // We could get the histograms for example:
-        vector<Mat> histograms = model->getHistograms();
+        vector<Mat> histograms = model->getMatVector("histograms");
         // But should I really visualize it? Probably the length is interesting:
         cout << "Size of the histograms: " << histograms[0].total() << endl;
 }
