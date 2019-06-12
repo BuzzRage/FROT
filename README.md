@@ -1,5 +1,8 @@
 # FROT
 Face Recognition Over TCP, with OpenCV
+
 A faire:
--séparer les deux pahse de la détection de visage
-(entrainement puis de dessin du label correct)
+- Mettre le code au propre
+- détailler les commentaires des fonctions
+- Enregistrer les données d'apprentissage au format .csv
+- Optimiser la détection (threshold)
