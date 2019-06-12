@@ -61,17 +61,17 @@ void ClientFrm::on_msgToSend_returnPressed()
 
 void ClientFrm::errorSocket(QAbstractSocket::SocketError erreur){
     switch(erreur){
-        case QAbstractSocket::HostNotFoundError:
-            msgBox->append(tr("<em>Erreur: Le serveur n'a pas pu être trouvé. Mauvaise IP ou mauvais port.</em>"));
-            break;
-        case QAbstractSocket::ConnectionRefusedError:
-            msgBox->append(tr("<em>Erreur: Le serveur a refusé la connexion. Vérifier si le programme serveur a bien été lancé. Vérifier également l'IP et le port.</em>"));
-            break;
-        case QAbstractSocket::RemoteHostClosedError:
-            msgBox->append(tr("<em>Erreur: Le serveur a coupé la connexion.</em>"));
-            break;
-        default:
-            msgBox->append(tr("<em>Erreur: ")+socket->errorString()+tr("</em>"));
+    case QAbstractSocket::HostNotFoundError:
+        msgBox->append(tr("<em>Erreur: Le serveur n'a pas pu être trouvé. Mauvaise IP ou mauvais port.</em>"));
+        break;
+    case QAbstractSocket::ConnectionRefusedError:
+        msgBox->append(tr("<em>Erreur: Le serveur a refusé la connexion. Vérifier si le programme serveur a bien été lancé. Vérifier également l'IP et le port.</em>"));
+        break;
+    case QAbstractSocket::RemoteHostClosedError:
+        msgBox->append(tr("<em>Erreur: Le serveur a coupé la connexion.</em>"));
+        break;
+    default:
+        msgBox->append(tr("<em>Erreur: ")+socket->errorString()+tr("</em>"));
     }
     connectBtn->setEnabled(true);
 }
@@ -100,7 +100,7 @@ void ClientFrm::getServerData()
     }
 
     if(image.isNull()){
-         msgBox->append("C'est pas une image !");
+        msgBox->append("C'est pas une image !");
     }else{
         outputLbl->setPixmap(QPixmap::fromImage(image));
         outputLbl->resize(outputLbl->pixmap()->size());

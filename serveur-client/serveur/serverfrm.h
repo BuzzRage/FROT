@@ -36,6 +36,8 @@ private slots:
     void extractImg(int,int,int);
     void train();
 
+    void on_thresholdSpn_editingFinished();
+
 private:
     QTcpServer *server;
     QTcpSocket *client;
@@ -46,6 +48,7 @@ private:
     time_t timer_init;
     raspicam::RaspiCam_Cv Camera;
     Mat flippedImg;
+    Mat recoVisage;
     CascadeClassifier faceCascade;
     int currentX;
     int currentY;
@@ -58,6 +61,8 @@ private:
     Ptr<FaceRecognizer > model;
     bool mode_photo;
     int sujet;
+    int threshold;
+    int cpt;
 
 };
 
