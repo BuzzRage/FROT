@@ -141,6 +141,7 @@ void ServerFrm::initCamera() {
         Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1 );
         Camera.set(CV_CAP_PROP_FRAME_WIDTH, 640 );
         Camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480 );
+        Camera.open();
         time(&timer_init);
         isSetted = true;
     }
@@ -149,7 +150,6 @@ void ServerFrm::initCamera() {
 void ServerFrm::getImage(){
     Mat image;
     Mat imgBuffer;
-    Camera.open();
     Camera.grab();
     Camera.retrieve(image);
     flip(image, flippedImg, -1);
