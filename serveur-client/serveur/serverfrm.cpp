@@ -169,7 +169,12 @@ void ServerFrm::getImage(){
             //qDebug()<<"J'suis.";
             if(!mode_photo){
                 model->set("threshold",threshold);
-                cv::Rect roi(faces[i].x-(faces[i].width/20),faces[i].y-(faces[i].height/10),faces[i].width+(faces[i].width/10),faces[i].height+(faces[i].height/5));
+                int x = (faces[i].x-(faces[i].width/20)>0) ? faces[i].x-(faces[i].width/20) : faces[i].x;
+                int y = (faces[i].y-(faces[i].height/10)>0) ? faces[i].y-(faces[i].height/10) : faces[i].y;
+                int width = (faces[i].width+(faces[i].width/10)+x < 640) ? faces[i].width+(faces[i].width/10) : faces[i].width;
+                int height = (faces[i].height+(faces[i].height/5)+y < 480 ) ? faces[i].height+(faces[i].height/5) : faces[i].height;
+
+                cv::Rect roi(x,y,width,height);
                 imgBuffer = flippedImg(roi);
                 int pred = model->predict(imgBuffer);
                 string model_info = format("\tLBPH(radius=%i, neighbors=%i, grid_x=%i, grid_y=%i, threshold=%.2f)",
